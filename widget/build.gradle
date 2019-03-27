@@ -27,10 +27,11 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'com.android.support.test:runner:1.0.2'
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    androidTestImplementation 'androidx.test:runner:1.1.2-alpha02'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0-alpha02'
 
-    implementation "com.android.support:design:$rootProject.supportLibraryVersion"
+    implementation 'androidx.core:core-ktx:1.1.0-alpha05'
+    implementation 'com.google.android.material:material:1.1.0-alpha04'
 }
 
 // 指定编码
