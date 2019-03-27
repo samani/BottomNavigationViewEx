@@ -1,16 +1,7 @@
-## [中文版点我](/README_ZH.md) ##
-
 ## BottomNavigationViewEx ##
 An android lib for enhancing BottomNavigationView.
 
 ![MIT License](https://img.shields.io/github/license/mashape/apistatus.svg) ![api 9+](https://img.shields.io/badge/API-9%2B-green.svg)
-
-
-## <a name="donate">Donator</a> ##
-
-| Info | Amount |
-|-------|------|
-| [Linsong Wang](https://github.com/wanglinsong) | 100$ |
 
 
 ## Features ##
@@ -133,17 +124,12 @@ allprojects {
 ```
 
 Step 2. Add the dependency
-1. old version support lib is 25 or 26
+
+1. new version support lib = 28
 ```groovy
-compile 'com.github.ittianyu:BottomNavigationViewEx:1.2.4'
-compile "com.android.support:design:26.+"
+implementation 'com.github.samani:BottomNavigationViewEx:2.1.0'
 ```
-2. new version support lib = 28
-```groovy
-implementation 'com.github.ittianyu:BottomNavigationViewEx:2.0.2'
-implementation "com.android.support:design:28.0.0"
-```
-3. AndroidX
+2. AndroidX
 use new version，and add config into gradle.properties
 ```
 android.useAndroidX=true
@@ -152,7 +138,7 @@ android.enableJetifier=true
 
 #### Manual: ####
 
-Downloading [BottomNavigationViewEx.java](https://raw.githubusercontent.com/ittianyu/BottomNavigationViewEx/master/widget/src/main/java/com/ittianyu/bottomnavigationviewex/BottomNavigationViewEx.java) and copying it to you project.
+Downloading [BottomNavigationViewEx.java](https://raw.githubusercontent.com/samani/BottomNavigationViewEx/master/widget/src/main/java/com/ittianyu/bottomnavigationviewex/BottomNavigationViewEx.java) and copying it to you project.
 
 
 ## Getting started ##
@@ -269,7 +255,7 @@ Thanks to [Adrián Mouly](https://github.com/amouly) | [liaolintao](https://gith
 
 	MIT License
 	
-	Copyright (c) 2017 ittianyu
+	Copyright (c) 2017 samani
 	
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -288,10 +274,3 @@ Thanks to [Adrián Mouly](https://github.com/amouly) | [liaolintao](https://gith
 	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 	SOFTWARE.
-
-## Donate ##
-
-**paypal: admin@ittianyu.com**
-
-![](/read_me_images/donate_alipay.png) ![](/read_me_images/donate_wechat.png)
-
