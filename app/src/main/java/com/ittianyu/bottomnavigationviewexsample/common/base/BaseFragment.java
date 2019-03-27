@@ -1,15 +1,16 @@
 package com.ittianyu.bottomnavigationviewexsample.common.base;
 
-import android.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.ittianyu.bottomnavigationviewexsample.R;
 import com.ittianyu.bottomnavigationviewexsample.databinding.FragBaseBinding;
+
+import androidx.annotation.Nullable;
+import androidx.databinding.DataBindingUtil;
+import androidx.fragment.app.Fragment;
 
 /**
  * Created by yu on 2016/11/11.

@@ -1,9 +1,7 @@
 package com.ittianyu.bottomnavigationviewexsample.features;
 
 import android.content.Intent;
-import android.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
 import com.ittianyu.bottomnavigationviewexsample.R;
@@ -13,6 +11,9 @@ import com.ittianyu.bottomnavigationviewexsample.features.centerfab.CenterFabAct
 import com.ittianyu.bottomnavigationviewexsample.features.setupwithviewpager.SetupWithViewPagerActivity;
 import com.ittianyu.bottomnavigationviewexsample.features.style.StyleActivity;
 import com.ittianyu.bottomnavigationviewexsample.features.viewpager.WithViewPagerActivity;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.databinding.DataBindingUtil;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private ActivityMainBinding bind;

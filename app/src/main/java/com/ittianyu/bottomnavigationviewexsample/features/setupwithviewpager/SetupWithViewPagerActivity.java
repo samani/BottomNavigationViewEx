@@ -1,22 +1,23 @@
 package com.ittianyu.bottomnavigationviewexsample.features.setupwithviewpager;
 
-import android.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.design.widget.BottomNavigationView;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
 
-import com.ittianyu.bottomnavigationviewexsample.common.base.BaseFragment;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.ittianyu.bottomnavigationviewexsample.R;
+import com.ittianyu.bottomnavigationviewexsample.common.base.BaseFragment;
 import com.ittianyu.bottomnavigationviewexsample.databinding.ActivityWithViewPagerBinding;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.databinding.DataBindingUtil;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentPagerAdapter;
 
 public class SetupWithViewPagerActivity extends AppCompatActivity {
     private static final String TAG = SetupWithViewPagerActivity.class.getSimpleName();
