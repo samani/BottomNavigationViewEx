@@ -1,10 +1,19 @@
 package com.ittianyu.bottomnavigationviewex;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Paint;
 import android.graphics.Typeface;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
+import com.google.android.material.bottomnavigation.BottomNavigationItemView;
+import com.google.android.material.bottomnavigation.BottomNavigationMenuView;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import androidx.transition.Transition;
+import androidx.transition.TransitionSet;
+import androidx.viewpager.widget.ViewPager;
 import android.util.AttributeSet;
 import android.util.SparseIntArray;
 import android.util.TypedValue;
@@ -15,18 +24,13 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.google.android.material.bottomnavigation.BottomNavigationItemView;
-import com.google.android.material.bottomnavigation.BottomNavigationMenuView;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
-
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
-
-import androidx.viewpager.widget.ViewPager;
 
 /**
  * Created by yu on 2016/11/10.
  */
+@SuppressLint("RestrictedApi")
 public class BottomNavigationViewEx extends BottomNavigationView {
     // used for animation
     private float mShiftAmount;
@@ -54,22 +58,109 @@ public class BottomNavigationViewEx extends BottomNavigationView {
 
     public BottomNavigationViewEx(Context context) {
         super(context);
+        init();
     }
 
     public BottomNavigationViewEx(Context context, AttributeSet attrs) {
         super(context, attrs);
+        init();
     }
 
     public BottomNavigationViewEx(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        init();
     }
+
+    private void init() {
+        try {
+            addAnimationListener();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    private void addAnimationListener() {
+        /**
+         * 1. BottomNavigationMenuView mMenuView
+         * 2. private final BottomNavigationAnimationHelperBase mAnimationHelper;
+         * 3. private final TransitionSet mSet;
+         */
+        BottomNavigationMenuView mMenuView = getBottomNavigationMenuView();
+        Object mAnimationHelper = getField(mMenuView.getClass(), mMenuView, "animationHelper");
+        TransitionSet mSet = getField(mAnimationHelper.getClass(), mAnimationHelper, "set");
+        mSet.addListener(new Transition.TransitionListener() {
+            @Override
+            public void onTransitionStart(@NonNull Transition transition) {
+            }
+
+            @Override
+            public void onTransitionEnd(@NonNull Transition transition) {
+                refreshTextViewVisibility();
+            }
+
+            @Override
+            public void onTransitionCancel(@NonNull Transition transition) {
+                refreshTextViewVisibility();
+            }
+
+            @Override
+            public void onTransitionPause(@NonNull Transition transition) {
+            }
+
+            @Override
+            public void onTransitionResume(@NonNull Transition transition) {
+            }
+        });
+    }
+
+    private void refreshTextViewVisibility() {
+        if (!textVisibility)
+            return;
+        // 1. get mMenuView
+        BottomNavigationMenuView mMenuView = getBottomNavigationMenuView();
+        // 2. get mButtons
+        BottomNavigationItemView[] mButtons = getBottomNavigationItemViews();
+
+        int currentItem = getCurrentItem();
+
+        // 3. get field mShiftingMode and TextView in mButtons
+        for (BottomNavigationItemView button : mButtons) {
+            TextView mLargeLabel = getField(button.getClass(), button, "largeLabel");
+            TextView mSmallLabel = getField(button.getClass(), button, "smallLabel");
+
+            mLargeLabel.clearAnimation();
+            mSmallLabel.clearAnimation();
+
+            // mShiftingMode
+            boolean mShiftingMode = getField(button.getClass(), button, "shiftingMode");
+            boolean selected = button.getItemPosition() == currentItem;
+            if (mShiftingMode) {
+                if (selected) {
+                    mLargeLabel.setVisibility(VISIBLE);
+                } else {
+                    mLargeLabel.setVisibility(INVISIBLE);
+                }
+                mSmallLabel.setVisibility(INVISIBLE);
+            } else {
+                if (selected) {
+                    mLargeLabel.setVisibility(VISIBLE);
+                    mSmallLabel.setVisibility(INVISIBLE);
+                } else {
+                    mLargeLabel.setVisibility(INVISIBLE);
+                    mSmallLabel.setVisibility(VISIBLE);
+                }
+            }
+        }
+    }
+
 
     /**
      * change the visibility of icon
      *
      * @param visibility
      */
-    public BottomNavigationViewEx setIconVisibility(boolean visibility) {
+    public void setIconVisibility(boolean visibility) {
         /*
         1. get field in this class
         private final BottomNavigationMenuView mMenuView;
@@ -121,14 +212,13 @@ public class BottomNavigationViewEx extends BottomNavigationView {
         } else {
             // if not record the mItemHeight, we need do nothing.
             if (!visibilityHeightRecord)
-                return this;
+                return;
 
             // restore it
             setItemHeight(mItemHeight);
         }
 
         mMenuView.updateMenuView();
-        return this;
     }
 
     /**
@@ -136,7 +226,7 @@ public class BottomNavigationViewEx extends BottomNavigationView {
      *
      * @param visibility
      */
-    public BottomNavigationViewEx setTextVisibility(boolean visibility) {
+    public void setTextVisibility(boolean visibility) {
         this.textVisibility = visibility;
         /*
         1. get field in this class
@@ -202,13 +292,12 @@ public class BottomNavigationViewEx extends BottomNavigationView {
         } else {
             // if not record the mItemHeight, we need do nothing.
             if (!visibilityHeightRecord)
-                return this;
+                return;
             // restore mItemHeight
             setItemHeight(mItemHeight);
         }
 
         mMenuView.updateMenuView();
-        return this;
     }
 
     /**
@@ -229,7 +318,7 @@ public class BottomNavigationViewEx extends BottomNavigationView {
      *
      * @param enable It means the text won't scale and icon won't move when active it in no item shifting mode if false.
      */
-    public BottomNavigationViewEx enableAnimation(boolean enable) {
+    public void enableAnimation(boolean enable) {
         /*
         1. get field in this class
         private final BottomNavigationMenuView mMenuView;
@@ -289,7 +378,7 @@ public class BottomNavigationViewEx extends BottomNavigationView {
             } else {
                 // haven't change the value. It means it was the first call this method. So nothing need to do.
                 if (!animationRecord)
-                    return this;
+                    return;
                 // enable animation
                 setField(button.getClass(), button, "shiftAmount", mShiftAmount);
                 setField(button.getClass(), button, "scaleUpFactor", mScaleUpFactor);
@@ -299,17 +388,14 @@ public class BottomNavigationViewEx extends BottomNavigationView {
             }
         }
         mMenuView.updateMenuView();
-        return this;
     }
 
     /**
-     * @Deprecated use {@link #setLabelVisibilityMode }
      * enable the shifting mode for navigation
      *
      * @param enable It will has a shift animation if true. Otherwise all items are the same width.
      */
-    @Deprecated
-    public BottomNavigationViewEx enableShiftingMode(boolean enable) {
+    public void enableShiftingMode(boolean enable) {
         /*
         1. get field in this class
         private final BottomNavigationMenuView mMenuView;
@@ -318,22 +404,19 @@ public class BottomNavigationViewEx extends BottomNavigationView {
         private boolean mShiftingMode = true;
          */
         // 1. get mMenuView
-//        BottomNavigationMenuView mMenuView = getBottomNavigationMenuView();
+        BottomNavigationMenuView mMenuView = getBottomNavigationMenuView();
         // 2. change field mShiftingMode value in mMenuView
-//        setField(mMenuView.getClass(), mMenuView, "isShifting", enable);
-//        mMenuView.updateMenuView();
-        setLabelVisibilityMode(enable ? 0 : 1);
-        return this;
+        setField(mMenuView.getClass(), mMenuView, "shiftingMode", enable);
+
+        mMenuView.updateMenuView();
     }
 
     /**
-     * @Deprecated use {@link #setItemHorizontalTranslationEnabled(boolean)}
      * enable the shifting mode for each item
      *
      * @param enable It will has a shift animation for item if true. Otherwise the item text always be shown.
      */
-    @Deprecated
-    public BottomNavigationViewEx enableItemShiftingMode(boolean enable) {
+    public void enableItemShiftingMode(boolean enable) {
         /*
         1. get field in this class
         private final BottomNavigationMenuView mMenuView;
@@ -345,18 +428,14 @@ public class BottomNavigationViewEx extends BottomNavigationView {
         private boolean mShiftingMode = true;
          */
         // 1. get mMenuView
-//        BottomNavigationMenuView mMenuView = getBottomNavigationMenuView();
-        // 2. get buttons
-//        BottomNavigationItemView[] mButtons = getBottomNavigationItemViews();
+        BottomNavigationMenuView mMenuView = getBottomNavigationMenuView();
+        // 2. get mButtons
+        BottomNavigationItemView[] mButtons = getBottomNavigationItemViews();
         // 3. change field mShiftingMode value in mButtons
-//        for (BottomNavigationItemView button : mButtons) {
-//            button.setShifting(enable);
-//        }
-//        mMenuView.updateMenuView();
-
-        setItemHorizontalTranslationEnabled(enable);
-
-        return this;
+        for (BottomNavigationItemView button : mButtons) {
+            setField(button.getClass(), button, "shiftingMode", enable);
+        }
+        mMenuView.updateMenuView();
     }
 
     /**
@@ -375,6 +454,8 @@ public class BottomNavigationViewEx extends BottomNavigationView {
         3. get menu and traverse it to get the checked one
          */
 
+        // 1. get mMenuView
+//        BottomNavigationMenuView mMenuView = getBottomNavigationMenuView();
         // 2. get mButtons
         BottomNavigationItemView[] mButtons = getBottomNavigationItemViews();
         // 3. get menu and traverse it to get the checked one
@@ -412,9 +493,34 @@ public class BottomNavigationViewEx extends BottomNavigationView {
      *
      * @param item start from 0.
      */
-    public BottomNavigationViewEx setCurrentItem(int index) {
-        setSelectedItemId(getMenu().getItem(index).getItemId());
-        return this;
+    public void setCurrentItem(int item) {
+        // check bounds
+        if (item < 0 || item >= getMaxItemCount()) {
+            throw new ArrayIndexOutOfBoundsException("item is out of bounds, we expected 0 - "
+                    + (getMaxItemCount() - 1) + ". Actually " + item);
+        }
+
+        /*
+        1. get field in this class
+        private final BottomNavigationMenuView mMenuView;
+
+        2. get field in mMenuView
+        private BottomNavigationItemView[] mButtons;
+        private final OnClickListener mOnClickListener;
+
+        3. call mOnClickListener.onClick();
+         */
+        // 1. get mMenuView
+        BottomNavigationMenuView mMenuView = getBottomNavigationMenuView();
+        // 2. get mButtons
+        BottomNavigationItemView[] mButtons = getBottomNavigationItemViews();
+        // get mOnClickListener
+        View.OnClickListener mOnClickListener = getField(mMenuView.getClass(), mMenuView, "onClickListener");
+
+//        System.out.println("mMenuView:" + mMenuView + " mButtons:" + mButtons + " mOnClickListener" + mOnClickListener);
+        // 3. call mOnClickListener.onClick();
+        mOnClickListener.onClick(mButtons[item]);
+
     }
 
     /**
@@ -429,7 +535,7 @@ public class BottomNavigationViewEx extends BottomNavigationView {
     }
 
     @Override
-    public void setOnNavigationItemSelectedListener(OnNavigationItemSelectedListener listener) {
+    public void setOnNavigationItemSelectedListener(@Nullable OnNavigationItemSelectedListener listener) {
         // if not set up with view pager, the same with father
         if (null == mMyOnNavigationItemSelectedListener) {
             super.setOnNavigationItemSelectedListener(listener);
@@ -550,13 +656,12 @@ public class BottomNavigationViewEx extends BottomNavigationView {
      *
      * @param sp
      */
-    public BottomNavigationViewEx setSmallTextSize(float sp) {
+    public void setSmallTextSize(float sp) {
         int count = getItemCount();
         for (int i = 0; i < count; i++) {
             getSmallLabelAt(i).setTextSize(sp);
         }
         mMenuView.updateMenuView();
-        return this;
     }
 
     /**
@@ -567,15 +672,12 @@ public class BottomNavigationViewEx extends BottomNavigationView {
      *
      * @param sp
      */
-    public BottomNavigationViewEx setLargeTextSize(float sp) {
+    public void setLargeTextSize(float sp) {
         int count = getItemCount();
         for (int i = 0; i < count; i++) {
-            TextView tvLarge = getLargeLabelAt(i);
-            if (null != tvLarge)
-                tvLarge.setTextSize(sp);
+            getLargeLabelAt(i).setTextSize(sp);
         }
         mMenuView.updateMenuView();
-        return this;
     }
 
     /**
@@ -586,10 +688,9 @@ public class BottomNavigationViewEx extends BottomNavigationView {
      *
      * @param sp
      */
-    public BottomNavigationViewEx setTextSize(float sp) {
+    public void setTextSize(float sp) {
         setLargeTextSize(sp);
         setSmallTextSize(sp);
-        return this;
     }
 
     /**
@@ -599,7 +700,7 @@ public class BottomNavigationViewEx extends BottomNavigationView {
      * @param width    in dp
      * @param height   in dp
      */
-    public BottomNavigationViewEx setIconSizeAt(int position, float width, float height) {
+    public void setIconSizeAt(int position, float width, float height) {
         ImageView icon = getIconAt(position);
         // update size
         ViewGroup.LayoutParams layoutParams = icon.getLayoutParams();
@@ -608,7 +709,6 @@ public class BottomNavigationViewEx extends BottomNavigationView {
         icon.setLayoutParams(layoutParams);
 
         mMenuView.updateMenuView();
-        return this;
     }
 
     /**
@@ -617,22 +717,11 @@ public class BottomNavigationViewEx extends BottomNavigationView {
      * @param width  in dp
      * @param height in dp
      */
-    public BottomNavigationViewEx setIconSize(float width, float height) {
+    public void setIconSize(float width, float height) {
         int count = getItemCount();
         for (int i = 0; i < count; i++) {
             setIconSizeAt(i, width, height);
         }
-        return this;
-    }
-    
-     /**
-     * set all item ImageView size
-     *
-     * @param dpSize  in dp
-     */
-    public BottomNavigationViewEx setIconSize(float dpSize) {
-        setItemIconSize(dp2px(getContext(),dpSize));
-        return this;
     }
 
     /**
@@ -640,14 +729,13 @@ public class BottomNavigationViewEx extends BottomNavigationView {
      *
      * @param height in px
      */
-    public BottomNavigationViewEx setItemHeight(int height) {
+    public void setItemHeight(int height) {
         // 1. get mMenuView
         final BottomNavigationMenuView mMenuView = getBottomNavigationMenuView();
         // 2. set private final int mItemHeight in mMenuView
         setField(mMenuView.getClass(), mMenuView, "itemHeight", height);
 
         mMenuView.updateMenuView();
-        return this;
     }
 
     /**
@@ -680,14 +768,13 @@ public class BottomNavigationViewEx extends BottomNavigationView {
      * @attr ref android.R.styleable#TextView_typeface
      * @attr ref android.R.styleable#TextView_textStyle
      */
-    public BottomNavigationViewEx setTypeface(Typeface typeface, int style) {
+    public void setTypeface(Typeface typeface, int style) {
         int count = getItemCount();
         for (int i = 0; i < count; i++) {
             getLargeLabelAt(i).setTypeface(typeface, style);
             getSmallLabelAt(i).setTypeface(typeface, style);
         }
         mMenuView.updateMenuView();
-        return this;
     }
 
     /**
@@ -695,14 +782,13 @@ public class BottomNavigationViewEx extends BottomNavigationView {
      *
      * @attr ref android.R.styleable#TextView_typeface
      */
-    public BottomNavigationViewEx setTypeface(Typeface typeface) {
+    public void setTypeface(Typeface typeface) {
         int count = getItemCount();
         for (int i = 0; i < count; i++) {
             getLargeLabelAt(i).setTypeface(typeface);
             getSmallLabelAt(i).setTypeface(typeface);
         }
         mMenuView.updateMenuView();
-        return this;
     }
 
     /**
@@ -754,7 +840,7 @@ public class BottomNavigationViewEx extends BottomNavigationView {
      *
      * @param viewPager
      */
-    public void setupWithViewPager(final ViewPager viewPager) {
+    public void setupWithViewPager(@Nullable final ViewPager viewPager) {
         setupWithViewPager(viewPager, false);
     }
 
@@ -766,7 +852,7 @@ public class BottomNavigationViewEx extends BottomNavigationView {
      * @param viewPager
      * @param smoothScroll whether ViewPager changed with smooth scroll animation
      */
-    public BottomNavigationViewEx setupWithViewPager(final ViewPager viewPager, boolean smoothScroll) {
+    public void setupWithViewPager(@Nullable final ViewPager viewPager, boolean smoothScroll) {
         if (mViewPager != null) {
             // If we've already been setup with a ViewPager, remove us from it
             if (mPageChangeListener != null) {
@@ -777,7 +863,7 @@ public class BottomNavigationViewEx extends BottomNavigationView {
         if (null == viewPager) {
             mViewPager = null;
             super.setOnNavigationItemSelectedListener(null);
-            return this;
+            return;
         }
 
         mViewPager = viewPager;
@@ -792,7 +878,6 @@ public class BottomNavigationViewEx extends BottomNavigationView {
         OnNavigationItemSelectedListener listener = getOnNavigationItemSelectedListener();
         mMyOnNavigationItemSelectedListener = new MyOnNavigationItemSelectedListener(viewPager, this, smoothScroll, listener);
         super.setOnNavigationItemSelectedListener(mMyOnNavigationItemSelectedListener);
-        return this;
     }
 
     /**
@@ -801,7 +886,7 @@ public class BottomNavigationViewEx extends BottomNavigationView {
      * kept in sync.
      * <p>
      * <p>This class stores the provided BottomNavigationViewEx weakly, meaning that you can use
-     * {@link ViewPager#addOnPageChangeListener(ViewPager.OnPageChangeListener)
+     * {@link ViewPager#addOnPageChangeListener( ViewPager.OnPageChangeListener)
      * addOnPageChangeListener(OnPageChangeListener)} without removing the listener and
      * not cause a leak.
      */
@@ -861,7 +946,7 @@ public class BottomNavigationViewEx extends BottomNavigationView {
         }
 
         @Override
-        public boolean onNavigationItemSelected(MenuItem item) {
+        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             int position = items.get(item.getItemId());
             // only set item when item changed
             if (previousPosition == position) {
@@ -894,24 +979,20 @@ public class BottomNavigationViewEx extends BottomNavigationView {
 
     }
 
-    public BottomNavigationViewEx enableShiftingMode(int position, boolean enable) {
+    public void enableShiftingMode(int position, boolean enable) {
         getBottomNavigationItemView(position).setShifting(enable);
-        return this;
     }
 
-    public BottomNavigationViewEx setItemBackground(int position, int background) {
+    public void setItemBackground(int position, int background) {
         getBottomNavigationItemView(position).setItemBackground(background);
-        return this;
     }
 
-    public BottomNavigationViewEx setIconTintList(int position, ColorStateList tint) {
+    public void setIconTintList(int position, ColorStateList tint) {
         getBottomNavigationItemView(position).setIconTintList(tint);
-        return this;
     }
 
-    public BottomNavigationViewEx setTextTintList(int position, ColorStateList tint) {
+    public void setTextTintList(int position, ColorStateList tint) {
         getBottomNavigationItemView(position).setTextColor(tint);
-        return this;
     }
 
     /**
@@ -919,11 +1000,10 @@ public class BottomNavigationViewEx extends BottomNavigationView {
      *
      * @param marginTop in px
      */
-    public BottomNavigationViewEx setIconsMarginTop(int marginTop) {
+    public void setIconsMarginTop(int marginTop) {
         for (int i = 0; i < getItemCount(); i++) {
             setIconMarginTop(i, marginTop);
         }
-        return this;
     }
 
     /**
@@ -932,7 +1012,7 @@ public class BottomNavigationViewEx extends BottomNavigationView {
      * @param position
      * @param marginTop in px
      */
-    public BottomNavigationViewEx setIconMarginTop(int position, int marginTop) {
+    public void setIconMarginTop(int position, int marginTop) {
         /*
         1. BottomNavigationItemView
         2. private final int mDefaultMargin;
@@ -940,7 +1020,5 @@ public class BottomNavigationViewEx extends BottomNavigationView {
         BottomNavigationItemView itemView = getBottomNavigationItemView(position);
         setField(BottomNavigationItemView.class, itemView, "defaultMargin", marginTop);
         mMenuView.updateMenuView();
-        return this;
     }
-
 }
